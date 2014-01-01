@@ -1,0 +1,10 @@
+#################
+## Unity
+#################
+
+/*
+!.git*
+!/Assets/
+/Assets/*
+!/Assets/Scripts
+*.meta
