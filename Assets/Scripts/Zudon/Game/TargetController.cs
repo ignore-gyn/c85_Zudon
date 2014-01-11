@@ -20,22 +20,17 @@ public class TargetController : MonoBehaviour, IComponents {
 	
 	private float[] targetSpeedOptions = new float[] {4, 6, 9, 12, 18};
 	private int targetSpeedOptionsNum = 5;
-	private int targetRespawnCycle = 36;			// Respawn時に無敵タイムが必要かなー
+	//private int targetRespawnCycle = 36;			// Respawn時に無敵タイムが必要かなー
 	
 	private int targetAllDestroyed;						// すべての的が破壊された時間
 	private int targetRespawnInterval = 36;		// すべての的が破壊されてからRespawnまでの時間
 	
-	private int score = 0;
-
-
 	// Cache of Components
 	public GameManager gameManager;
-	private Player player;
 	
 	public void _Awake () {
 		// Parent Component
 		gameManager = transform.parent.GetComponent<GameManager>();
-		player = gameManager.player;
 	}
 	
 	public void _Start () {
@@ -94,18 +89,18 @@ public class TargetController : MonoBehaviour, IComponents {
 				
 			case Target.State.Hit:
 				/*
-				if (target.collision == null && target.collider == null ) {
+				if (target.collisionInfo == null && target.colliderInfo == null ) {
 					Debug.Log("Not set collision information.");
 					break;
 				}
-				if (target.collision != null) {
-					ContactPoint contact = target.collision.contacts[0];
+				if (target.collisionInfo != null) {
+					ContactPoint contact = target.collisionInfo.contacts[0];
 					Quaternion rot = Quaternion.FromToRotation(Vector3.up, contact.normal);
 					Vector3 pos = contact.point;
 					//Instantiate(explosionPrefab, pos, rot);
 				}
-				target.collision = null;
-				target.collider = null;
+				target.collisionInfo = null;
+				target.colliderInfo = null;
 				*/
 				
 				//Instantiate(explosionPrefab, target.transform.position, target.transform.rotation);
@@ -118,11 +113,6 @@ public class TargetController : MonoBehaviour, IComponents {
 				break;
 				
 			case Target.State.Dead:
-				/* // 壊れたものからすぐにRespawn
-				if (gameManager.GameFrame % targetRespawnCycle == 0) {
-					target.gameObject.SetActive(true);
-					InitTarget(target);
-				}*/
 				break;
 			}
 		}
@@ -134,7 +124,7 @@ public class TargetController : MonoBehaviour, IComponents {
 			if (gameManager.GameFrame - targetAllDestroyed >= targetRespawnInterval) {
 				for (int i = 0; i < feverTargetNum; i++) {
 					
-					if (gameManager.GameFrame < gameManager.GameLength - gameManager.feverTime) {
+					if (!gameManager.isFeverTime) {
 						if (i >= targetNum) break;
 					}
 					
@@ -150,8 +140,8 @@ public class TargetController : MonoBehaviour, IComponents {
 		target.transform.position = target.initialPosition;
 		target.speed = targetSpeedOptions[Random.Range (0, targetSpeedOptionsNum)];
 		target.state = Target.State.Alive;
-		target.collision = null;
-		target.collider = null;
+		target.collisionInfo = null;
+		target.colliderInfo = null;
 		target.deadTime = 0;
 		target.spawnTime = gameManager.GameFrame;
 	}

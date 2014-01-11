@@ -17,25 +17,25 @@ public class Target : MonoBehaviour {
 	
 	// variable
 	[HideInInspector] public float speed;
-	[HideInInspector] public State state;				// also changed by Target Instance only on hit with bullet
-	[HideInInspector] public Collision collision;	// also changed by Target Instance only on hit with bullet
-	[HideInInspector] public Collider collider;		// also changed by Target Instance only on hit with bullet
+	[HideInInspector] public State state;						// also changed by Target Instance only on hit with bullet
+	[HideInInspector] public Collision collisionInfo;		// also changed by Target Instance only on hit with bullet
+	[HideInInspector] public Collider colliderInfo;		// also changed by Target Instance only on hit with bullet
 	[HideInInspector] public int deadTime;
 	public int spawnTime;
 	//[HideInInspector] public int score;
 	
 	public Vector3[] positionMatrix = new Vector3[] {	
-		new Vector3(2.0f, 1.4f, 0),
-		new Vector3(2.8f, 1.4f, 0),
-		new Vector3(3.6f, 1.4f, 0),
-		new Vector3(4.4f, 1.4f, 0),
-		new Vector3(5.2f, 1.4f, 0),
+		new Vector3(2.0f, 1.6f, 0),
+		new Vector3(2.8f, 1.6f, 0),
+		new Vector3(3.6f, 1.6f, 0),
+		new Vector3(4.4f, 1.6f, 0),
+		new Vector3(5.2f, 1.6f, 0),
 		
-		new Vector3(2.4f, 2.0f, 0),
-		new Vector3(3.2f, 2.0f, 0),
-		new Vector3(4.0f, 2.0f, 0),
-		new Vector3(4.8f, 2.0f, 0),
-		new Vector3(5.6f, 2.0f, 0),
+		new Vector3(2.4f, 1.6f, 0),
+		new Vector3(3.2f, 1.6f, 0),
+		new Vector3(4.0f, 1.6f, 0),
+		new Vector3(4.8f, 1.6f, 0),
+		new Vector3(5.6f, 1.6f, 0),
 	};
 	
 	// 衝突判定と通知しかしない
@@ -48,7 +48,7 @@ public class Target : MonoBehaviour {
 		if (other.gameObject.layer != (int)GameMaster.Layer.Bullet) return;
 		
 		state = State.Hit;
-		collision = other;
+		collisionInfo = other;
 	}
 	
 	private void JudgeHit (Collider other) {
@@ -56,7 +56,7 @@ public class Target : MonoBehaviour {
 		if (other.gameObject.layer != (int)GameMaster.Layer.Bullet) return;
 		
 		state = State.Hit;
-		collider = other;
+		colliderInfo = other;
 	}
 */
 	// Bulletから衝突メッセージを受け取った時, TargetControllerへ通知	

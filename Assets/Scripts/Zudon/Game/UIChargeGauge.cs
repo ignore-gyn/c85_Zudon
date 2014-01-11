@@ -16,7 +16,7 @@ public class UIChargeGauge : MonoBehaviour, IComponents {
 	/// </summary>
 	/// <param name="threshold">チャージ値(0～1)</param>
 	public void DisplayChargeGauge (float threshold) {
-		float alpha = 1-threshold;		// 逆グラデのときは1- threshold
-		if (alpha != 0) renderer.material.SetFloat("_Cutoff", alpha);
+		float alpha = 1 - threshold;
+		renderer.material.SetFloat("_Cutoff", alpha);
 	}
 }

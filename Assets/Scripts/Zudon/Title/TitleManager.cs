@@ -4,33 +4,41 @@ using System.Collections;
 public class TitleManager : MonoBehaviour {
 	
 	private int ScoreDigit = 4;
-	private Transform[,] NumberObjects;
-	private Transform[] currentDisplayNumberObjects;
-	private Transform ScoreStringObject;
-	private Transform clearScoreStringObject;
+	
+	//private Transform[,] NumberObjects;
+	//private Transform[] currentDisplayNumberObjects;
+	//private Transform ScoreStringObject;
+	//private Transform clearScoreStringObject;
 	
 	// Cache of Components
 	private GameMaster gameMaster;
 	private Sound sound;
+	private SpriteCollection spriteCollection;
+	
+	private SpriteRenderer rendererScoreBase;
+	private UnityEngine.Sprite[] spriteScoreBaseArray;
+	private SpriteRenderer[] rendererNumber;
+	private UnityEngine.Sprite[] spriteNumberArray;
+	
 	
 	private void Awake () {
 		// Parent Component
 		gameMaster = transform.parent.GetComponent<GameMaster>();
 		sound = transform.parent.GetComponent<Sound>();
+		spriteCollection = transform.parent.GetComponent<SpriteCollection>();
 		
-		currentDisplayNumberObjects = new Transform[ScoreDigit];
-		CacheScoreNumberObjects();
+		spriteScoreBaseArray = spriteCollection.titleScoreBase;
+		spriteNumberArray = spriteCollection.number45;
+		
+		rendererScoreBase =  transform.Find("HighScore").GetComponent<SpriteRenderer>();
+		rendererNumber = new SpriteRenderer[ScoreDigit];
+		for (int i = 0; i < ScoreDigit; i++) {
+			rendererNumber[i] = transform.Find("HighScore/Score" + (i+1) + "degit").GetComponent<SpriteRenderer>();
+		}
 	}
 	
 	private void OnEnable () {
-		ScoreStringObject.renderer.enabled = false;
-		clearScoreStringObject.renderer.enabled = false;
-		for (int i = 0; i < ScoreDigit; i++) {
-			currentDisplayNumberObjects[i] = null;
-			for (int j = 0; j < 10; j++) {
-				NumberObjects[i, j].renderer.enabled = false;
-			}
-		}
+		if (gameMaster.currentGameState != GameMaster.GameState.Title) return;
 		
 		DisplayScore(gameMaster.HighScore);
 	}
@@ -44,43 +52,27 @@ public class TitleManager : MonoBehaviour {
 	}
 	
 	/// <summary>
-	/// ハイスコアの表示(表示中のオブジェクトを無効にし,新しく表示するオブジェクトを有効にする)
+	/// ハイスコアの表示
 	/// </summary>
 	/// <param name="score">表示スコア</param>
-	public void DisplayScore (int score) {
+	private void DisplayScore (int score) {
 		int[] number = new int[ScoreDigit];
 		
-		if (score == 0) {
-			ScoreStringObject.renderer.enabled = false;
-			clearScoreStringObject.renderer.enabled = false;
+		if (score <= 0) {
+			rendererScoreBase.sprite = null;
 			return;
-		} else if (score >= gameMaster.clearScore) {
-			ScoreStringObject.renderer.enabled = false;
-			clearScoreStringObject.renderer.enabled = true;
+		} else if (score < gameMaster.clearScore) {
+			rendererScoreBase.sprite = spriteScoreBaseArray[0];
 		} else {
-			ScoreStringObject.renderer.enabled = true;
-			clearScoreStringObject.renderer.enabled = false;
-		}
-				
-		foreach (Transform numberObject in currentDisplayNumberObjects) {
-			if (numberObject != null) numberObject.renderer.enabled = false;
+			rendererScoreBase.sprite = spriteScoreBaseArray[1];
 		}
 		
 		int validDegit = DecomposeNumber(score, ref number);
-		
 		for (int i = 0; i < ScoreDigit; i++) {
-			currentDisplayNumberObjects[i] = NumberObjects[i, number[i]];
-			currentDisplayNumberObjects[i].renderer.enabled = true;
-		}
-	}
-	
-	private void CacheScoreNumberObjects () {
-		ScoreStringObject = transform.Find("HighScore");
-		clearScoreStringObject = transform.Find("HighScore/Score_Clear");
-		NumberObjects = new Transform[ScoreDigit, 10];
-		for (int i = 0; i < 10; i++) {
-			for  (int j = 0; j < ScoreDigit; j++) {
-				NumberObjects[j, i] = transform.Find("HighScore/Score/Score" + (j+1) + "degit/Number_" + i);
+			if (i < validDegit) { 
+				rendererNumber[i].sprite = spriteNumberArray[number[i]];
+			} else {
+				rendererNumber[i].sprite = null;
 			}
 		}
 	}

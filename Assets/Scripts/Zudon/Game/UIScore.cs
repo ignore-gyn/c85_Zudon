@@ -4,57 +4,42 @@ using System.Collections;
 public class UIScore : MonoBehaviour, IComponents {
 	
 	private int ScoreDigit = 4;
-	private Transform[,] NumberObjects;
-	private Transform[] currentDisplayNumberObjects;
 	
 	// Cache of Components
 	private UIController uiCtrl;
+	
+	private SpriteRenderer[] spriteRenderer;
+	private UnityEngine.Sprite[] spriteNumberArray;
 	
 	
 	public void _Awake () {
 		// Ancestor Components
 		uiCtrl = transform.parent.GetComponent<UIController>();
+		spriteNumberArray = uiCtrl.spriteCollection.number45;
 		
-		currentDisplayNumberObjects = new Transform[ScoreDigit];
-		CacheScoreNumberObjects();
+		spriteRenderer = new SpriteRenderer[ScoreDigit];
+		for (int i = 0; i < ScoreDigit; i++) {
+			spriteRenderer[i] = transform.Find("Score" + (i+1) + "degit").GetComponent<SpriteRenderer>();
+		}
 	}
 	
 	public void _Start () {
 		for (int i = 0; i < ScoreDigit; i++) {
-			currentDisplayNumberObjects[i] = null;
-			for (int j = 0; j < 10; j++) {
-				NumberObjects[i, j].renderer.enabled = false;
-			}
+			spriteRenderer[i].sprite = spriteNumberArray[0];
 		}
 	}
 	
 	/// <summary>
-	/// スコアの表示(表示中のオブジェクトを無効にし,新しく表示するオブジェクトを有効にする)
+	/// スコアの表示
 	/// </summary>
 	/// <param name="score">表示スコア</param>
 	public void DisplayScore (int score) {
 		int[] number = new int[ScoreDigit];
 		
-		foreach (Transform numberObject in currentDisplayNumberObjects) {
-			if (numberObject != null) numberObject.renderer.enabled = false;
-		}
-		
-		int validDegit = uiCtrl.DecomposeNumber(score, ref number);
-		if (score == 0) validDegit = 0;
-		
+		uiCtrl.DecomposeNumber(score, ref number);
 		for (int i = 0; i < ScoreDigit; i++) {
-			currentDisplayNumberObjects[i] = NumberObjects[i, number[i]];
-			currentDisplayNumberObjects[i].renderer.enabled = true;
+			spriteRenderer[i].sprite = spriteNumberArray[number[i]];
 		}
-		
 	}
 	
-	private void CacheScoreNumberObjects () {
-		NumberObjects = new Transform[ScoreDigit, 10];
-		for (int i = 0; i < 10; i++) {
-			for  (int j = 0; j < ScoreDigit; j++) {
-				NumberObjects[j, i] = transform.Find("Score" + (j+1) + "degit/Number_" + i);
-			}
-		}
-	}
 }

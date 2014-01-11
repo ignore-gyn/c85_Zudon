@@ -97,10 +97,9 @@ public class Sound : MonoBehaviour {
 	// BGMフェードアウト
 	public void FadeOutBGM (int fadeoutBGMTime) {
 		foreach(AudioSource source in BGMsources){
-			float volume = BGMsources[1].volume - (float)1 / fadeoutBGMTime;
+			float volume = source.volume - (float)1 / fadeoutBGMTime;
 			if (volume < 0) volume = 0;
-			BGMsources[0].volume = volume;
-			BGMsources[1].volume = volume;
+			source.volume = volume;
 		}
 	}
 	

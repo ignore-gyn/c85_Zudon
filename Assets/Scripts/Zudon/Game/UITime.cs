@@ -1,30 +1,37 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class UITime : MonoBehaviour, IComponents {
 	
 	private int TimeDigit = 4;
-	private Transform[,] TimeNumberObjects;
-	private Transform[] currentDisplayNumberObjects;
 	
 	// Cache of Components
 	private UIController uiCtrl;
 	
+	private SpriteRenderer[] spriteRenderer;
+	private UnityEngine.Sprite[][] spriteNumberArray;
+
 
 	public void _Awake () {
 		// Ancestor Components
 		uiCtrl = transform.parent.GetComponent<UIController>();
 		
-		currentDisplayNumberObjects = new Transform[TimeDigit];
-		CacheTimeNumberObjects();
+		spriteNumberArray = new UnityEngine.Sprite[4][];
+		spriteNumberArray[0] = uiCtrl.spriteCollection.number25;
+		spriteNumberArray[1] = uiCtrl.spriteCollection.number25;
+		spriteNumberArray[2] = uiCtrl.spriteCollection.number45;
+		spriteNumberArray[3] = uiCtrl.spriteCollection.number45;
+				
+		spriteRenderer = new SpriteRenderer[TimeDigit];
+		for (int i = 0; i < TimeDigit; i++) {
+			spriteRenderer[i] = transform.Find("Time" + (i+1) + "degit").GetComponent<SpriteRenderer>();
+		}
 	}
 	
 	public void _Start () {
 		for (int i = 0; i < TimeDigit; i++) {
-			currentDisplayNumberObjects[i] = null;
-			for (int j = 0; j < 10; j++) {
-				TimeNumberObjects[i, j].renderer.enabled = false;
-			}
+			spriteRenderer[i].sprite = spriteNumberArray[i][0];
 		}
 	}
 	
@@ -37,26 +44,11 @@ public class UITime : MonoBehaviour, IComponents {
 		int second = time % 100;
 		int minutes = (time >= 100 ? (time - second)/100 : 0);
 		time = minutes * 100 + second;
-		
-		foreach (Transform numberObject in currentDisplayNumberObjects) {
-			if (numberObject != null) numberObject.renderer.enabled = false;
-		}
-		
+
 		uiCtrl.DecomposeNumber(time, ref number);
-		
 		for (int i = 0; i < TimeDigit; i++) {
-			currentDisplayNumberObjects[i] = TimeNumberObjects[i, number[i]];
-			currentDisplayNumberObjects[i].renderer.enabled = true;
+			spriteRenderer[i].sprite = spriteNumberArray[i][number[i]];
 		}
 	}
 	
-	private void CacheTimeNumberObjects () {
-		TimeNumberObjects = new Transform[TimeDigit, 10];
-		for (int i = 0; i < 10; i++) {
-			TimeNumberObjects[0, i] = transform.Find("Time1degit").Find("Number_" + i);
-			TimeNumberObjects[1, i] = transform.Find("Time2degit").Find("Number_" + i);
-			TimeNumberObjects[2, i] = transform.Find("Time3degit").Find("Number_" + i);
-			TimeNumberObjects[3, i] = transform.Find("Time4degit").Find("Number_" + i);
-		}
-	}
 }

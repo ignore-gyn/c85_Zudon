@@ -6,7 +6,7 @@ public class UIController : MonoBehaviour, IComponents {
 
 	// Cache of Components
 	public GameManager gameManager;
-	private Player player;
+	public SpriteCollection spriteCollection;
 	
 	public UIBase uiBase;
 	public UITime uiTime;
@@ -20,11 +20,12 @@ public class UIController : MonoBehaviour, IComponents {
 	// <-- Add Child UI Components
 	private List<IComponents> uiChildComponents = new List<IComponents>();
 	
+	public Sprite[] sprites = new Sprite[5];
 	
 	public void _Awake () {
 		// Parent Component
 		gameManager = transform.parent.GetComponent<GameManager>();
-		player = gameManager.player;
+		spriteCollection = gameManager.spriteCollection;
 		
 		// Child Components	
 		uiBase = transform.Find("Base").GetComponent<UIBase>();
@@ -75,12 +76,12 @@ public class UIController : MonoBehaviour, IComponents {
 			uiGo.renderer.enabled = false;
 			uiTimeup.renderer.enabled = false;
 			break;
-		case GameManager.State.Start:
+		case GameManager.State.Go:
 			uiGo.Blink();
 			uiReady.renderer.enabled = false;
 			uiTimeup.renderer.enabled = false;
 			break;
-		case GameManager.State.Game:
+		case GameManager.State.Main:
 			uiReady.renderer.enabled = false;
 			uiGo.renderer.enabled = false;
 			uiTimeup.renderer.enabled = false;

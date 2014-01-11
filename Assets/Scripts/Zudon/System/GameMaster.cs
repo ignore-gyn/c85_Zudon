@@ -9,12 +9,15 @@ public interface IComponents {
 	void _Start();
 }
 
+
 public class GameMaster : MonoBehaviour {
 
 	public int clearScore = 1000;
-
+	public bool debugMode = false;		// true:ゲームシーンのみ（ゲーム開始前・終了後演出なし）
+	
 	//--------------------------------------------------------------
 	
+	// Layer of Objects (used for collision detection)
 	public enum Layer {
 		UI = 8,
 		Bullet,
@@ -22,16 +25,48 @@ public class GameMaster : MonoBehaviour {
 		Ground,
 		Wall,
 	}
-	
+
+	// Game Scene Control	
 	public enum GameState {
 		None = -1,
 		Title = 0,
 		Game,
 	};
 
-	public GameState NextGameState { get; set; }
-	private GameState currentGameState = GameState.Title;
+	public GameState currentGameState = GameState.None;
+	// Cache of Objects and Components
+	private GameObject titleScene;
+	private GameObject gameScene;
+	private TitleManager titleManager;
+	private GameManager gameManager;
+	// <-- Add Scene Components
 	
+	public GameState NextGameState {
+		set {
+			currentGameState = value;
+			
+			switch (currentGameState) {
+			case GameState.None:
+				titleScene.SetActive(false);
+				gameScene.SetActive(false);
+				break;
+			case GameState.Title:
+				gameScene.SetActive(false);
+				titleScene.SetActive(true);
+				break;
+			case GameState.Game:
+				titleScene.SetActive(false);
+				gameScene.SetActive(true);
+				break;
+			default:
+				Debug.LogError("Invalid State is set to NextGameState");
+				return;
+			}
+		}
+	}
+	
+	
+	// High Score displayed in Title scene
 	private int highScore = -1;
 	public int HighScore {
 		get {
@@ -40,7 +75,7 @@ public class GameMaster : MonoBehaviour {
 		
 		set {
 			if (highScore < value) {
-				highScore = value;
+				highScore = (value > 9999 ? 9999 : value);
 				SaveData(highScore);
 			}
 		}
@@ -48,16 +83,16 @@ public class GameMaster : MonoBehaviour {
 	
 	private string saveFileName = "sv.ign";
 
-	// Cache of Components
-	private GameObject titleScene;
-	private GameObject gameScene;
-	// <-- Add Scene Objects.
 	
-	private void Start () {
+	private void Awake () {
+		Application.targetFrameRate = 60;
+	
+		HighScore = LoadData();
+		
 		titleScene = GameObject.Find("TitleScene");
 		if (titleScene == null) {
 			Debug.LogError("TitleScene is not found.");
-		} 
+		}
 		
 		gameScene = GameObject.Find("GameScene");
 		if (gameScene == null) {
@@ -67,41 +102,15 @@ public class GameMaster : MonoBehaviour {
 		titleScene.SetActive(false);
 		gameScene.SetActive(false);
 		
-		HighScore = LoadData();
-		currentGameState = GameState.None;
 		NextGameState = GameState.Title;
 	}
 	
-	private void Update () {
-		// シーン遷移条件判定
-		switch(currentGameState) {
-		case GameState.Title:
-			break;
-		case GameState.Game:
-			break;
-		}		
-		
-		// シーンの切り替え
-		while(NextGameState != GameState.None) {
-			currentGameState = NextGameState;
-			NextGameState = GameState.None;
-			
-			switch(currentGameState) {
-			case GameState.Title:
-				titleScene.SetActive(true);
-				gameScene.SetActive(false);
-				break;
-			case GameState.Game:
-				titleScene.SetActive(false);
-				gameScene.SetActive(true);
-				break;
-			}
-		}
-	}
 	
 	// Save&Load Data
 	private void SaveData (int score) {
-		FileStream fs = new FileStream(saveFileName, FileMode.Create, FileAccess.ReadWrite);
+		FileStream fs = new FileStream(saveFileName,
+													  FileMode.Create,
+													  FileAccess.ReadWrite);
 		BinaryWriter  writer = new BinaryWriter(fs);
 		
 		writer.Write(score);
@@ -109,7 +118,9 @@ public class GameMaster : MonoBehaviour {
 	}
 	
 	private int LoadData () {
-		FileStream fs = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+		FileStream fs = new FileStream(saveFileName,
+													  FileMode.OpenOrCreate,
+													  FileAccess.ReadWrite);
 		BinaryReader  reader = new BinaryReader(fs);
 		int score;
 		
@@ -118,6 +129,7 @@ public class GameMaster : MonoBehaviour {
 		} catch(EndOfStreamException) {
 			score = 0;
 		}
+		
 		fs.Close ();
 		return score;
 	}

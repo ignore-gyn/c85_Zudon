@@ -5,67 +5,58 @@ using System.Collections;
 public class UICombo : MonoBehaviour, IComponents {
 	
 	private int ComboDigit = 3;
-	private Transform[,] ComboNumberObjects;
-	private Transform[] currentDisplayNumberObjects;
 	private Transform ComboStringObject;
 	
 	// Cache of Components
 	private UIController uiCtrl;
 	
+	private SpriteRenderer[] spriteRenderer;
+	private UnityEngine.Sprite[] spriteNumberArray;
+	
 	
 	public void _Awake () {
 		// Ancestor Components
 		uiCtrl = transform.parent.GetComponent<UIController>();
+		spriteNumberArray = uiCtrl.spriteCollection.number45;
 		
-		currentDisplayNumberObjects = new Transform[ComboDigit];
-		CacheComboNumberObjects();
+		ComboStringObject =  transform.Find("ComboString");
+		spriteRenderer = new SpriteRenderer[ComboDigit];
+		for (int i = 0; i < ComboDigit; i++) {
+			spriteRenderer[i] = transform.Find("Combo" + (i+1) + "degit").GetComponent<SpriteRenderer>();
+		}
 	}
 	
 	public void _Start () {
 		ComboStringObject.renderer.enabled = false;
 		
 		for (int i = 0; i < ComboDigit; i++) {
-			currentDisplayNumberObjects[i] = null;
-			for (int j = 0; j < 10; j++) {
-				ComboNumberObjects[i, j].renderer.enabled = false;
-			}
+			spriteRenderer[i].sprite = null;
 		}
 	}
 	
 	/// <summary>
-	/// コンボの表示(表示中のオブジェクトを無効にし,新しく表示するオブジェクトを有効にする)
+	/// コンボの表示
 	/// </summary>
 	/// <param name="combo">表示コンボ数</param>
 	public void DisplayCombo (int combo) {
 		int[] number = new int[ComboDigit];
-
-		foreach (Transform numberObject in currentDisplayNumberObjects) {
-			if (numberObject != null) numberObject.renderer.enabled = false;
-		}
+		int validDegit;
 		
-		int validDegit = uiCtrl.DecomposeNumber(combo, ref number);
-		if (combo == 0) validDegit = 0;
+		if (combo == 0) {
+			validDegit = 0;
+			ComboStringObject.renderer.enabled = false;
+		} else {
+			validDegit = uiCtrl.DecomposeNumber(combo, ref number);
+			ComboStringObject.renderer.enabled = true;
+		}
 		
 		for (int i = 0; i < ComboDigit; i++) {
-			if (i < validDegit) {
-				currentDisplayNumberObjects[i] = ComboNumberObjects[i, number[i]];
-				currentDisplayNumberObjects[i].renderer.enabled = true;
+			if (i < validDegit) { 
+				spriteRenderer[i].sprite = spriteNumberArray[number[i]];
 			} else {
-				currentDisplayNumberObjects[i] = null;
+				spriteRenderer[i].sprite = null;
 			}
 		}
-		
-		ComboStringObject.renderer.enabled = (combo != 0 ? true : false);
 	}
 	
-	private void CacheComboNumberObjects () {
-		ComboStringObject = transform.Find("ComboString");
-		
-		ComboNumberObjects = new Transform[ComboDigit, 10];
-		for (int i = 0; i < 10; i++) {
-			ComboNumberObjects[0, i] = transform.Find("Combo1degit").Find("Number_" + i);
-			ComboNumberObjects[1, i] = transform.Find("Combo2degit").Find("Number_" + i);
-			ComboNumberObjects[2, i] = transform.Find("Combo3degit").Find("Number_" + i);
-		}
-	}
 }
